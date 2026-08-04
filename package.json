@@ -12,6 +12,7 @@
   "dependencies": {
     "@hookform/resolvers": "^5.7.1",
     "@prisma/adapter-pg": "^7.9.1",
+    "@prisma/client": "^7.9.1",
     "@supabase/ssr": "^0.12.4",
     "@supabase/supabase-js": "^2.109.0",
     "cookies-next": "^6.1.0",
