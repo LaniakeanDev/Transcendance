@@ -3,12 +3,11 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
 }
 
 model User {
-  id            String   @id @default(uuid())
+  id            String   @id @default(uuid()) @db.Uuid
   username      String   @unique
   email         String   @unique
   passwordHash  String   @map("password_hash")
@@ -26,8 +25,8 @@ model User {
 }
 
 model Post {
-  id        String   @id @default(uuid())
-  userId    String   @map("user_id")
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
   imageUrl  String   @map("image_url")
   caption   String?
   createdAt DateTime @default(now()) @map("created_at")
@@ -41,9 +40,9 @@ model Post {
 }
 
 model Like {
-  id        String   @id @default(uuid())
-  userId    String   @map("user_id")
-  postId    String   @map("post_id")
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  postId    String   @map("post_id") @db.Uuid
   createdAt DateTime @default(now()) @map("created_at")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -55,9 +54,9 @@ model Like {
 }
 
 model Comment {
-  id        String   @id @default(uuid())
-  userId    String   @map("user_id")
-  postId    String   @map("post_id")
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  postId    String   @map("post_id") @db.Uuid
   text      String
   createdAt DateTime @default(now()) @map("created_at")
 
@@ -69,9 +68,9 @@ model Comment {
 }
 
 model Message {
-  id         String    @id @default(uuid())
-  senderId   String    @map("sender_id")
-  receiverId String    @map("receiver_id")
+  id         String    @id @default(uuid()) @db.Uuid
+  senderId   String    @map("sender_id") @db.Uuid
+  receiverId String    @map("receiver_id") @db.Uuid
   content    String
   createdAt  DateTime  @default(now()) @map("created_at")
   readAt     DateTime? @map("read_at")
@@ -81,5 +80,6 @@ model Message {
 
   @@index([senderId])
   @@index([receiverId])
+  @@index([senderId, receiverId])
   @@map("messages")
 }
