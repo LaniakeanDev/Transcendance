@@ -155,7 +155,7 @@ export default function GlintPost(props: GlintPostProps) {
     <div className="max-w-md mx-auto border border-gray-200 dark:border-gray-600 rounded-lg overflow-hidden">
       {/* Header - User Info */}
       <div className="flex items-center p-3">
-        <div className="w-8 h-8 rounded-full overflow-hidden bg-linear-to-r from-purple-400 to-pink-500 p-0.5">
+        <div className="w-8 h-8 rounded-full overflow-hidden bg-linear-to-r from-(--glint)/80 to-(--glint) p-0.5">
           <div className="w-full h-full rounded-full overflow-hidden bg-white dark:bg-gray-600 p-0.5">
             {post.user.avatarUrl ? (
               <Image
