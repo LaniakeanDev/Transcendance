@@ -6,15 +6,27 @@ export async function POST(req: Request) {
   const { email, username, password } = await req.json();
 
   if (!email || !username || !password) {
-    return NextResponse.json({ error: 'Champs manquants' }, { status: 400 });
+    return NextResponse.json({ error: 'Missing fields' }, { status: 400 });
   }
 
-  const existing = await prisma.user.findFirst({
-    where: { OR: [{ email }, { username }] },
+  const existingEmail = await prisma.user.findUnique({
+    where: { email },
   });
-  if (existing) {
+
+  if (existingEmail) {
     return NextResponse.json(
-      { error: 'Email ou pseudo déjà utilisé' },
+      { error: 'This email is already in use' },
+      { status: 409 }
+    );
+  }
+
+  const existingUsername = await prisma.user.findUnique({
+    where: { username },
+  });
+
+  if (existingUsername) {
+    return NextResponse.json(
+      { error: 'This pseudo is already in use' },
       { status: 409 }
     );
   }
