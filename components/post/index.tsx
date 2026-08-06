@@ -193,6 +193,7 @@ export default function GlintPost(props: GlintPostProps) {
           src={post.imageUrl}
           alt="Post"
           fill
+          priority
           className="object-cover"
           sizes="(max-width: 640px) 100vw, 640px"
         />
