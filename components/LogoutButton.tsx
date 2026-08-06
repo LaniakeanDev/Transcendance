@@ -11,5 +11,5 @@ export default function LogoutButton() {
     router.refresh();
   };
 
-  return <button onClick={handleLogout}>Se déconnecter</button>;
+  return <button onClick={handleLogout}>Sign out</button>;
 }

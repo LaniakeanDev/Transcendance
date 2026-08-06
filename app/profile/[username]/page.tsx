@@ -44,6 +44,8 @@ export default async function ProfilePage({
               src={profileUser.avatarUrl}
               alt={profileUser.username}
               fill
+              priority
+              sizes="(min-width: 640px) 128px, 96px"
               className="object-cover"
             />
           ) : (
@@ -105,7 +107,7 @@ export default async function ProfilePage({
           </div>
         ) : (
           <div className="grid grid-cols-3 gap-1 sm:gap-2">
-            {posts.map((post) => (
+            {posts.map((post, index) => (
               <Link
                 key={post.id}
                 href={`/posts/${post.id}`}
@@ -116,6 +118,8 @@ export default async function ProfilePage({
                     src={post.imageUrl}
                     alt={post.caption ?? 'Post'}
                     fill
+                    sizes="(min-width: 768px) 256px, 33vw"
+                    priority={index === 0}
                     className="object-cover transition group-hover:opacity-90"
                   />
                 ) : (
