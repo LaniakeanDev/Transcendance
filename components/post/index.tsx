@@ -1,82 +1,66 @@
 'use client';
 import React, { useState } from 'react';
 import Image from 'next/image';
+import { Prisma } from '@prisma/client';
 
-// Mock user data
-const mockUser: User = {
-  id: 'user_1',
-  username: 'johndoe',
-  name: 'John Doe',
-  avatarUrl: 'https://picsum.photos/seed/user1/200',
-};
+type CommentWithUserInfo = Prisma.CommentGetPayload<{
+  select: {
+    id: true;
+    text: true;
+    createdAt: true;
+    userId: true;
+    user: {
+      select: {
+        id: true;
+        username: true;
+        avatarUrl: true;
+      };
+    };
+  };
+}>;
 
-// Mock comments
-const mockComments: GlintComment[] = [
-  {
-    id: 'comment_1',
-    userId: 'user_2',
-    text: 'This is amazing! 🔥',
-    createdAt: new Date(Date.now() - 1000 * 60 * 15), // 15 mins ago
+type PostWithRelations = Prisma.PostGetPayload<{
+  select: {
+    id: true;
+    userId: true;
+    imageUrl: true;
+    caption: true;
+    createdAt: true;
     user: {
-      id: 'user_2',
-      username: 'janedoe',
-      name: 'Jane Doe',
-      avatarUrl: 'https://picsum.photos/seed/user2/200',
-    },
-  },
-  {
-    id: 'comment_2',
-    userId: 'user_3',
-    text: 'Love this! 😍',
-    createdAt: new Date(Date.now() - 1000 * 60 * 45), // 45 mins ago
-    user: {
-      id: 'user_3',
-      username: 'alexsmith',
-      name: 'Alex Smith',
-      avatarUrl: 'https://picsum.photos/seed/user3/200',
-    },
-  },
-];
-
-// Mock likes
-const mockLikes: Like[] = [
-  {
-    id: 'like_1',
-    userId: 'user_2',
-    user: {
-      id: 'user_2',
-      username: 'janedoe',
-    },
-  },
-  {
-    id: 'like_2',
-    userId: 'user_3',
-    user: {
-      id: 'user_3',
-      username: 'alexsmith',
-    },
-  },
-  {
-    id: 'like_3',
-    userId: 'user_4',
-    user: {
-      id: 'user_4',
-      username: 'emilyw',
-    },
-  },
-];
-
-// Mock post data
-const mockPost: Post = {
-  id: 'post_1',
-  userId: 'user_1',
-  imageUrl: 'https://picsum.photos/seed/post1/600/600',
-  caption: 'Beautiful sunset at the beach 🌅 #nature #sunset #beach',
-  createdAt: new Date(Date.now() - 1000 * 60 * 60 * 2), // 2 hours ago
-  user: mockUser,
-  likes: mockLikes,
-  comments: mockComments,
-};
+      select: {
+        id: true;
+        username: true;
+        avatarUrl: true;
+      };
+    };
+    likes: {
+      select: {
+        id: true;
+        userId: true;
+        user: {
+          select: {
+            id: true;
+            username: true;
+          };
+        };
+      };
+    };
+    comments: {
+      select: {
+        id: true;
+        userId: true;
+        text: true;
+        createdAt: true;
+        user: {
+          select: {
+            id: true;
+            username: true;
+          };
+        };
+      };
+    };
+  };
+}>;
 
 // Format time helper
 const formatTimeAgo = (date: Date): string => {
@@ -101,21 +85,14 @@ const formatTimeAgo = (date: Date): string => {
   return 'now';
 };
 
-// Format like count
-const formatCount = (count: number): string => {
-  if (count >= 1000000) return `${(count / 1000000).toFixed(1)}M`;
-  if (count >= 1000) return `${(count / 1000).toFixed(1)}K`;
-  return count.toString();
-};
-
 interface GlintPostProps {
-  post?: Post;
+  post: PostWithRelations;
   onLike?: (postId: string) => void;
   onComment?: (postId: string, text: string) => void;
 }
 
 export default function GlintPost(props: GlintPostProps) {
-  const { post = mockPost, onLike, onComment } = props;
+  const { post, onLike, onComment } = props;
   const [isLiked, setIsLiked] = useState(false);
   const [likesCount, setLikesCount] = useState(post.likes.length);
   const [commentText, setCommentText] = useState('');
@@ -133,15 +110,14 @@ export default function GlintPost(props: GlintPostProps) {
     e.preventDefault();
     if (!commentText.trim()) return;
 
-    const newComment: GlintComment = {
+    const newComment: CommentWithUserInfo = {
       id: `comment_${Date.now()}`,
-      userId: 'current_user',
       text: commentText,
       createdAt: new Date(),
+      userId: 'user_id',
       user: {
         id: 'current_user',
         username: 'currentuser',
-        name: 'Current User',
         avatarUrl: 'https://picsum.photos/seed/current/200',
       },
     };
@@ -152,7 +128,7 @@ export default function GlintPost(props: GlintPostProps) {
   };
 
   return (
-    <div className="max-w-md mx-auto border border-gray-200 dark:border-gray-600 rounded-lg overflow-hidden">
+    <div className="max-w-md mx-auto border border-gray-200 dark:border-gray-600 rounded-lg overflow-hidden mb-8">
       {/* Header - User Info */}
       <div className="flex items-center p-3">
         <div className="w-8 h-8 rounded-full overflow-hidden bg-linear-to-r from-(--glint)/80 to-(--glint) p-0.5">
@@ -230,7 +206,7 @@ export default function GlintPost(props: GlintPostProps) {
               </svg>
             )}
           </button>
-          <p className="text-sm">{formatCount(likesCount)}</p>
+          <p className="text-sm">{likesCount}</p>
         </div>
         <div className="flex items-center">
           <button
