@@ -4,6 +4,13 @@ import { getStorageClient } from '@/lib/supabase-storage';
 
 const MAX_SIZE = 500 * 1024; // 500KB
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+const AVATARS_PUBLIC_PREFIX = '/storage/v1/object/public/avatars/';
+
+function extractAvatarStoragePath(url: string): string | null {
+  const idx = url.indexOf(AVATARS_PUBLIC_PREFIX);
+  if (idx === -1) return null;
+  return url.slice(idx + AVATARS_PUBLIC_PREFIX.length);
+}
 
 export async function POST(req: Request) {
   const user = await getCurrentUser();
@@ -42,6 +49,13 @@ export async function POST(req: Request) {
   }
 
   const { data } = supabase.storage.from('avatars').getPublicUrl(path);
+
+  const oldPath = user.avatarUrl
+    ? extractAvatarStoragePath(user.avatarUrl)
+    : null;
+  if (oldPath && oldPath !== path) {
+    await supabase.storage.from('avatars').remove([oldPath]);
+  }
 
   return NextResponse.json({ url: data.publicUrl });
 }
