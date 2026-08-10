@@ -2,6 +2,7 @@ import Link from 'next/link';
 import Logo from '@/public/logo';
 import UserIcon from '@/public/user';
 import PlusIcon from '@/public/plus';
+import MessageIcon from '@/public/message';
 
 export default function Navbar() {
   return (
@@ -21,6 +22,12 @@ export default function Navbar() {
           </Link>
           <Link href="/post" className="hover:opacity-70 transition-opacity">
             <PlusIcon size={40} />
+          </Link>
+          <Link
+            href="/messages"
+            className="hover:opacity-70 transition-opacity"
+          >
+            <MessageIcon size={40} />
           </Link>
         </div>
       </div>
