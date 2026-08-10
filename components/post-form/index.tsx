@@ -70,8 +70,6 @@ export const PostForm: React.FC<PostFormProps> = ({ onSuccess, onError }) => {
       // Reset form
       reset();
       setPreviewUrl(null);
-
-      // Call success callback
       onSuccess?.();
     } catch (error) {
       console.error('Error creating post:', error);
@@ -92,7 +90,6 @@ export const PostForm: React.FC<PostFormProps> = ({ onSuccess, onError }) => {
       </h2>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        {/* Image Upload */}
         <div>
           <div className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg p-6 hover:border-gray-400 transition-colors">
             {previewUrl ? (
@@ -108,7 +105,6 @@ export const PostForm: React.FC<PostFormProps> = ({ onSuccess, onError }) => {
                   type="button"
                   onClick={() => {
                     setPreviewUrl(null);
-                    // Reset file input
                     const input = document.getElementById(
                       'image-upload'
                     ) as HTMLInputElement;
@@ -179,7 +175,6 @@ export const PostForm: React.FC<PostFormProps> = ({ onSuccess, onError }) => {
             )}
         </div>
 
-        {/* Caption Input */}
         <div>
           <label
             htmlFor="caption"
@@ -213,7 +208,6 @@ export const PostForm: React.FC<PostFormProps> = ({ onSuccess, onError }) => {
           </div>
         )}
 
-        {/* Submit Button */}
         <div className="flex justify-end space-x-3">
           <button
             type="button"

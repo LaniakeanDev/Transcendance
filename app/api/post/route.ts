@@ -37,7 +37,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // If validation passes, proceed with validated data
     const validatedData = validationResult.data;
 
     // Upload to Cloudinary using buffer
