@@ -44,11 +44,21 @@ export async function POST(request: NextRequest) {
 
     const validatedData = validationResult.data;
 
+    const validatedReceiver = await prisma.user.findUnique({
+      where: {
+        username: receiver,
+      },
+    });
+
+    if (!validatedReceiver) {
+      return NextResponse.json({ message: 'User not found' }, { status: 404 });
+    }
+
     // Create message in database
     const message = await prisma.message.create({
       data: {
         senderId: user.id,
-        receiverId: user.id, // TO BE FIXED!!!
+        receiverId: validatedReceiver.id,
         content: validatedData.content,
       },
       include: {
