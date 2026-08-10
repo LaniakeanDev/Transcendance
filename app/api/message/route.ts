@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
     // Parse form data from the request
     const formData = await request.formData();
     const receiver = formData.get('receiver') as string;
-    const content = formData.get('contnent') as string;
+    const content = formData.get('content') as string;
 
     // VALIDATE WITH ZOD SCHEMA
     const validationResult = privateMessageSchema.safeParse({
@@ -44,28 +44,11 @@ export async function POST(request: NextRequest) {
 
     const validatedData = validationResult.data;
 
-    //     model Message {
-    //   id         String    @id @default(uuid()) @db.Uuid
-    //   senderId   String    @map("sender_id") @db.Uuid
-    //   receiverId String    @map("receiver_id") @db.Uuid
-    //   content    String
-    //   createdAt  DateTime  @default(now()) @map("created_at")
-    //   readAt     DateTime? @map("read_at")
-
-    //   sender   User @relation("MessageSender", fields: [senderId], references: [id], onDelete: Cascade)
-    //   receiver User @relation("MessageReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
-
-    //   @@index([senderId])
-    //   @@index([receiverId])
-    //   @@index([senderId, receiverId])
-    //   @@map("messages")
-    // }
-
     // Create message in database
     const message = await prisma.message.create({
       data: {
         senderId: user.id,
-        receiverId: validatedData.receiver,
+        receiverId: user.id, // TO BE FIXED!!!
         content: validatedData.content,
       },
       include: {
