@@ -1,6 +1,7 @@
 // import { NextRequest, NextResponse } from 'next/server';
 // import { prisma } from '@/lib/prisma';
 // import { getCurrentUser } from '@/lib/session';
+// import { PrismaClientKnownRequestError } from '@prisma/client/runtime/client';
 
 // export async function POST(request: NextRequest) {
 //   try {
@@ -8,13 +9,37 @@
 //     if (!user) {
 //       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
 //     }
-//     const { isLiked, postId, userId } = await request.json();
-//     const likeId = await prisma.like.findUnique({
-//       where: { postId, userId },
-//       select: {
-//         id: true
+//     const { newLikeStatus, postId, userId } = await request.json();
+//     if (newLikeStatus) {
+//       const like = await prisma.like.create({
+//         data: { userId: userId, postId: postId}
+//       });
+//       if (!like) {
+//         return NextResponse.json({ message: 'Could not create like' }, { status: 500 });
 //       }
-//     });
-//     const like = await prisma.like.update
+//       return NextResponse.json({ status: 201 });
+//     } else {
+//       const likeFetchResult = await prisma.like.findFirst({
+//         where: { postId, userId },
+//         select: {
+//           id: true
+//         }
+//       });
+//       if (!likeFetchResult) {
+//         return NextResponse.json({ message: 'Could not find like' }, { status: 500 });
+//       }
+//       const likeId = likeFetchResult?.id;
+//       try {
+//         const deletedLike = await prisma.like.delete({
+//           where: { id: likeId }
+//         });
+//         if (!deletedLike) {
+//           return NextResponse.json({ message: 'Could not delete like' }, { status: 500 });
+//         }
+//         return NextResponse.json({ status: 200 });
+//       } catch (error: PrismaClientKnownRequestError) {
+//         return NextResponse.json({ message: error.message || 'Could not delete like' }, { status: 500 });
+//       }
+//     }
 //   }
 // }

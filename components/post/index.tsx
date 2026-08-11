@@ -65,7 +65,7 @@ export default function GlintPost(props: GlintPostProps) {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          isLiked: newLiked,
+          newLikeStatus: newLiked,
           postId: post.id,
           userId: userId,
         }),
