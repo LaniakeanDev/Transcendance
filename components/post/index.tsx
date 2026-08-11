@@ -1,66 +1,7 @@
 'use client';
 import React, { useState } from 'react';
 import Image from 'next/image';
-import { Prisma } from '@prisma/client';
-
-type CommentWithUserInfo = Prisma.CommentGetPayload<{
-  select: {
-    id: true;
-    text: true;
-    createdAt: true;
-    userId: true;
-    user: {
-      select: {
-        id: true;
-        username: true;
-        avatarUrl: true;
-      };
-    };
-  };
-}>;
-
-type PostWithRelations = Prisma.PostGetPayload<{
-  select: {
-    id: true;
-    userId: true;
-    imageUrl: true;
-    caption: true;
-    createdAt: true;
-    user: {
-      select: {
-        id: true;
-        username: true;
-        avatarUrl: true;
-      };
-    };
-    likes: {
-      select: {
-        id: true;
-        userId: true;
-        user: {
-          select: {
-            id: true;
-            username: true;
-          };
-        };
-      };
-    };
-    comments: {
-      select: {
-        id: true;
-        userId: true;
-        text: true;
-        createdAt: true;
-        user: {
-          select: {
-            id: true;
-            username: true;
-          };
-        };
-      };
-    };
-  };
-}>;
+import { PostWithRelations, CommentWithUserInfo } from '@/types/types';
 
 // Format time helper
 const formatTimeAgo = (date: Date): string => {
@@ -102,7 +43,7 @@ export default function GlintPost(props: GlintPostProps) {
   const handleLike = () => {
     const newLikedState = !isLiked;
     setIsLiked(newLikedState);
-    setLikesCount((prev) => (newLikedState ? prev + 1 : prev - 1));
+    setLikesCount((prev: number) => (newLikedState ? prev + 1 : prev - 1));
     if (onLike) onLike(post.id);
   };
 
@@ -252,7 +193,7 @@ export default function GlintPost(props: GlintPostProps) {
           </button>
           {showComments && (
             <div className="mt-2 space-y-1 max-h-40 overflow-y-auto">
-              {comments.map((comment) => (
+              {comments.map((comment: CommentWithUserInfo) => (
                 <div key={comment.id} className="text-sm">
                   <span className="font-semibold">{comment.user.username}</span>
                   <span className="ml-1">{comment.text}</span>
