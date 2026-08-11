@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { getCurrentUser } from '@/lib/session';
 import cloudinary from 'cloudinary';
 import { privateMessageSchema } from '@/lib/validation/private-message';
-// import { revalidateTag } from 'next/cache';
+// import { revalidatePath } from 'next/cache';
 
 cloudinary.v2.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -78,6 +78,8 @@ export async function POST(request: NextRequest) {
         },
       },
     });
+
+    // revalidatePath("/messages");
 
     return NextResponse.json(message, { status: 201 });
   } catch (error: unknown) {

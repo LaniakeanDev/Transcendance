@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
@@ -19,6 +20,7 @@ export const PrivateMessageForm: React.FC<PrivateMessageFormProps> = ({
 }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const router = useRouter();
 
   const {
     register,
@@ -64,6 +66,7 @@ export const PrivateMessageForm: React.FC<PrivateMessageFormProps> = ({
       reset();
       setPreviewUrl(null);
       onSuccess?.();
+      router.refresh();
     } catch (error) {
       console.error('Error sending messsage:', error);
       setError('root', {

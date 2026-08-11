@@ -1,7 +1,7 @@
 import { prisma } from '@/lib/prisma';
 import { getCurrentUser } from '@/lib/session';
 
-const messages_short = [
+const messages_mockup = [
   'hi',
   'hello',
   'coucou',
@@ -12,7 +12,6 @@ const messages_short = [
   'hello',
   'coucou',
 ];
-const messages_mockup = messages_short.concat(messages_short);
 
 export default async function MessageHistory() {
   const user = await getCurrentUser();
@@ -20,6 +19,20 @@ export default async function MessageHistory() {
     ? await prisma.message.findMany({
         where: {
           OR: [{ senderId: user.id }, { receiverId: user.id }],
+        },
+        include: {
+          sender: {
+            select: {
+              id: true,
+              username: true,
+            },
+          },
+          receiver: {
+            select: {
+              id: true,
+              username: true,
+            },
+          },
         },
         orderBy: {
           createdAt: 'asc',
@@ -38,7 +51,12 @@ export default async function MessageHistory() {
                 htmlFor="content"
                 className="block text-sm font-medium text-gray-700 dark:text-gray-200"
               >
-                {'FROM -> TO'}
+                FROM: {item.sender.username} {'->'} TO: {item.receiver.username}{' '}
+                | {}
+                {new Intl.DateTimeFormat('en-US', {
+                  dateStyle: 'medium',
+                  timeStyle: 'short',
+                }).format(item.createdAt)}
               </label>
 
               <div className="block w-19/20 mx-auto p-3 bg-white dark:bg-gray-800 rounded-lg shadow-xl">

@@ -78,8 +78,8 @@ model Message {
   sender   User @relation("MessageSender", fields: [senderId], references: [id], onDelete: Cascade)
   receiver User @relation("MessageReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
 
-  @@index([senderId])
-  @@index([receiverId])
+  @@index([senderId, createdAt])
+  @@index([receiverId, createdAt])
   @@index([senderId, receiverId])
   @@map("messages")
 }
