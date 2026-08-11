@@ -28,24 +28,61 @@ const formatTimeAgo = (date: Date): string => {
 
 interface GlintPostProps {
   post: PostWithRelations;
+  userId: string;
   onLike?: (postId: string) => void;
   onComment?: (postId: string, text: string) => void;
 }
 
+const getInitialLikeStatus = (
+  userId: string,
+  post: PostWithRelations
+): boolean => {
+  for (const like of post.likes) {
+    if (userId === like.userId) {
+      return true;
+    }
+  }
+  return false;
+};
+
 export default function GlintPost(props: GlintPostProps) {
-  const { post, onLike, onComment } = props;
-  const [isLiked, setIsLiked] = useState(false);
+  const { post, userId, onLike, onComment } = props;
+  const initialLikeStatus = getInitialLikeStatus(userId, post);
+  const [isLiked, setIsLiked] = useState(initialLikeStatus);
   const [likesCount, setLikesCount] = useState(post.likes.length);
   const [commentText, setCommentText] = useState('');
   const [showComments, setShowComments] = useState(false);
   const [comments, setComments] = useState(post.comments);
 
-  const handleLike = () => {
-    const newLikedState = !isLiked;
-    setIsLiked(newLikedState);
-    setLikesCount((prev: number) => (newLikedState ? prev + 1 : prev - 1));
-    if (onLike) onLike(post.id);
-  };
+  async function handleLike() {
+    const newLiked = !isLiked;
+    setIsLiked(newLiked);
+    setLikesCount((prev: number) => (newLiked ? prev + 1 : prev - 1));
+    try {
+      const response = await fetch('/api/like', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          isLiked: newLiked,
+          postId: post.id,
+          userId: userId,
+        }),
+      });
+      if (!response.ok) {
+        const errorData = await response.json();
+        const detail = Array.isArray(errorData.errors)
+          ? errorData.errors.join(' ')
+          : null;
+        throw new Error(detail || errorData.message || 'Failed to like post');
+      }
+    } catch (error) {
+      setIsLiked(!newLiked);
+      setLikesCount((prev: number) => (newLiked ? prev - 1 : prev + 1));
+      console.error('Error liking post:', error);
+    }
+  }
 
   const handleCommentSubmit = (e: React.FormEvent) => {
     e.preventDefault();

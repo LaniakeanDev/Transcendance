@@ -1,5 +1,9 @@
 import { Prisma } from '@prisma/client';
 
+type Like = Prisma.LikeGetPayload;
+
+type Post = Prisma.PostGetPayload;
+
 type CommentWithUserInfo = Prisma.CommentGetPayload<{
   select: {
     id: true;
