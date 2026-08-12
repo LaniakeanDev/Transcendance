@@ -7,7 +7,8 @@ export async function POST(request: NextRequest) {
   if (!user) {
     return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
   }
-  const { newLikeStatus, postId, userId } = await request.json();
+  const { newLikeStatus, postId } = await request.json();
+  const userId = user.id;
   if (newLikeStatus) {
     const like = await prisma.like.create({
       data: { userId: userId, postId: postId },
