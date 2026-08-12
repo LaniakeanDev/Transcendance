@@ -29,8 +29,8 @@ const formatTimeAgo = (date: Date): string => {
 interface GlintPostProps {
   post: PostWithRelations;
   userId: string;
-  onLike?: (postId: string) => void;
-  onComment?: (postId: string, text: string) => void;
+  // onLike?: (postId: string) => void;
+  // onComment?: (postId: string, text: string) => void;
 }
 
 const getInitialLikeStatus = (
@@ -46,7 +46,7 @@ const getInitialLikeStatus = (
 };
 
 export default function GlintPost(props: GlintPostProps) {
-  const { post, userId, onLike, onComment } = props;
+  const { post, userId } = props;
   const initialLikeStatus = getInitialLikeStatus(userId, post);
   const [isLiked, setIsLiked] = useState(initialLikeStatus);
   const [likesCount, setLikesCount] = useState(post.likes.length);
@@ -67,7 +67,6 @@ export default function GlintPost(props: GlintPostProps) {
         body: JSON.stringify({
           newLikeStatus: newLiked,
           postId: post.id,
-          userId: userId,
         }),
       });
       if (!response.ok) {
@@ -84,26 +83,40 @@ export default function GlintPost(props: GlintPostProps) {
     }
   }
 
-  const handleCommentSubmit = (e: React.FormEvent) => {
+  async function handleCommentSubmit(e: React.SubmitEvent) {
     e.preventDefault();
     if (!commentText.trim()) return;
-
-    const newComment: CommentWithUserInfo = {
-      id: `comment_${Date.now()}`,
-      text: commentText,
-      createdAt: new Date(),
-      userId: 'user_id',
-      user: {
-        id: 'current_user',
-        username: 'currentuser',
-        avatarUrl: 'https://picsum.photos/seed/current/200',
-      },
-    };
-
-    setComments([newComment, ...comments]);
+    try {
+      const response = await fetch('/api/comment', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          text: commentText,
+          postId: post.id,
+          userId: userId,
+        }),
+      });
+      if (!response.ok) {
+        const errorData = await response.json();
+        const detail = Array.isArray(errorData.errors)
+          ? errorData.errors.join(' ')
+          : null;
+        throw new Error(detail || errorData.message || 'Failed to like post');
+      }
+      const data = await response.json();
+      const comment = data.comment;
+      const allComments = comments;
+      allComments.push(comment);
+      setComments(allComments);
+    } catch (error) {
+      // setIsLiked(!newLiked);
+      // setLikesCount((prev: number) => (newLiked ? prev - 1 : prev + 1));
+      console.error('Error commenting post:', error);
+    }
     setCommentText('');
-    if (onComment) onComment(post.id, commentText);
-  };
+  }
 
   return (
     <div className="max-w-md mx-auto border border-gray-200 dark:border-gray-600 rounded-lg overflow-hidden mb-8">
@@ -226,11 +239,11 @@ export default function GlintPost(props: GlintPostProps) {
             onClick={() => setShowComments(!showComments)}
             className="text-xs text-gray-500 cursor-pointer"
           >
-            View all {comments.length} comments
+            {showComments ? 'Hide' : 'View all'} {comments.length} comments
           </button>
           {showComments && (
             <div className="mt-2 space-y-1 max-h-40 overflow-y-auto">
-              {comments.map((comment: CommentWithUserInfo) => (
+              {comments.map((comment) => (
                 <div key={comment.id} className="text-sm">
                   <span className="font-semibold">{comment.user.username}</span>
                   <span className="ml-1">{comment.text}</span>
