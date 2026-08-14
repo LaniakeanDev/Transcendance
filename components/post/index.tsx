@@ -1,66 +1,7 @@
 'use client';
 import React, { useState } from 'react';
 import Image from 'next/image';
-import { Prisma } from '@prisma/client';
-
-type CommentWithUserInfo = Prisma.CommentGetPayload<{
-  select: {
-    id: true;
-    text: true;
-    createdAt: true;
-    userId: true;
-    user: {
-      select: {
-        id: true;
-        username: true;
-        avatarUrl: true;
-      };
-    };
-  };
-}>;
-
-type PostWithRelations = Prisma.PostGetPayload<{
-  select: {
-    id: true;
-    userId: true;
-    imageUrl: true;
-    caption: true;
-    createdAt: true;
-    user: {
-      select: {
-        id: true;
-        username: true;
-        avatarUrl: true;
-      };
-    };
-    likes: {
-      select: {
-        id: true;
-        userId: true;
-        user: {
-          select: {
-            id: true;
-            username: true;
-          };
-        };
-      };
-    };
-    comments: {
-      select: {
-        id: true;
-        userId: true;
-        text: true;
-        createdAt: true;
-        user: {
-          select: {
-            id: true;
-            username: true;
-          };
-        };
-      };
-    };
-  };
-}>;
+import { PostWithRelations, CommentWithUserInfo } from '@/types/types';
 
 // Format time helper
 const formatTimeAgo = (date: Date): string => {
@@ -87,45 +28,95 @@ const formatTimeAgo = (date: Date): string => {
 
 interface GlintPostProps {
   post: PostWithRelations;
-  onLike?: (postId: string) => void;
-  onComment?: (postId: string, text: string) => void;
+  userId: string;
+  // onLike?: (postId: string) => void;
+  // onComment?: (postId: string, text: string) => void;
 }
 
+const getInitialLikeStatus = (
+  userId: string,
+  post: PostWithRelations
+): boolean => {
+  for (const like of post.likes) {
+    if (userId === like.userId) {
+      return true;
+    }
+  }
+  return false;
+};
+
 export default function GlintPost(props: GlintPostProps) {
-  const { post, onLike, onComment } = props;
-  const [isLiked, setIsLiked] = useState(false);
+  const { post, userId } = props;
+  const initialLikeStatus = getInitialLikeStatus(userId, post);
+  const [isLiked, setIsLiked] = useState(initialLikeStatus);
   const [likesCount, setLikesCount] = useState(post.likes.length);
   const [commentText, setCommentText] = useState('');
   const [showComments, setShowComments] = useState(false);
   const [comments, setComments] = useState(post.comments);
 
-  const handleLike = () => {
-    const newLikedState = !isLiked;
-    setIsLiked(newLikedState);
-    setLikesCount((prev) => (newLikedState ? prev + 1 : prev - 1));
-    if (onLike) onLike(post.id);
-  };
+  async function handleLike() {
+    const newLiked = !isLiked;
+    setIsLiked(newLiked);
+    setLikesCount((prev: number) => (newLiked ? prev + 1 : prev - 1));
+    try {
+      const response = await fetch('/api/like', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          newLikeStatus: newLiked,
+          postId: post.id,
+        }),
+      });
+      if (!response.ok) {
+        const errorData = await response.json();
+        const detail = Array.isArray(errorData.errors)
+          ? errorData.errors.join(' ')
+          : null;
+        throw new Error(detail || errorData.message || 'Failed to like post');
+      }
+    } catch (error) {
+      setIsLiked(!newLiked);
+      setLikesCount((prev: number) => (newLiked ? prev - 1 : prev + 1));
+      console.error('Error liking post:', error);
+    }
+  }
 
-  const handleCommentSubmit = (e: React.FormEvent) => {
+  async function handleCommentSubmit(e: React.SubmitEvent) {
     e.preventDefault();
     if (!commentText.trim()) return;
-
-    const newComment: CommentWithUserInfo = {
-      id: `comment_${Date.now()}`,
-      text: commentText,
-      createdAt: new Date(),
-      userId: 'user_id',
-      user: {
-        id: 'current_user',
-        username: 'currentuser',
-        avatarUrl: 'https://picsum.photos/seed/current/200',
-      },
-    };
-
-    setComments([newComment, ...comments]);
+    try {
+      const response = await fetch('/api/comment', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          text: commentText,
+          postId: post.id,
+          userId: userId,
+        }),
+      });
+      if (!response.ok) {
+        const errorData = await response.json();
+        const detail = Array.isArray(errorData.errors)
+          ? errorData.errors.join(' ')
+          : null;
+        throw new Error(detail || errorData.message || 'Failed to like post');
+      }
+      const data = await response.json();
+      const comment = data.comment;
+      const allComments = comments;
+      allComments.push(comment);
+      setComments(allComments);
+    } catch (error) {
+      // setIsLiked(!newLiked);
+      // setLikesCount((prev: number) => (newLiked ? prev - 1 : prev + 1));
+      console.error('Error commenting post:', error);
+    }
     setCommentText('');
-    if (onComment) onComment(post.id, commentText);
-  };
+  }
 
   return (
     <div className="max-w-md mx-auto border border-gray-200 dark:border-gray-600 rounded-lg overflow-hidden mb-8">
@@ -248,7 +239,7 @@ export default function GlintPost(props: GlintPostProps) {
             onClick={() => setShowComments(!showComments)}
             className="text-xs text-gray-500 cursor-pointer"
           >
-            View all {comments.length} comments
+            {showComments ? 'Hide' : 'View all'} {comments.length} comments
           </button>
           {showComments && (
             <div className="mt-2 space-y-1 max-h-40 overflow-y-auto">
