@@ -2,19 +2,23 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useForm, SubmitHandler } from 'react-hook-form';
+import { useForm, SubmitHandler, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
   privateMessageSchema,
   PrivateMessageFormData,
 } from '@/lib/validation/private-message';
+import { Autocomplete, TextField } from '@mui/material';
+import { User } from '@prisma/client';
 
 interface PrivateMessageFormProps {
+  users: User[];
   onSuccess?: () => void;
   onError?: (error: Error) => void;
 }
 
 export const PrivateMessageForm: React.FC<PrivateMessageFormProps> = ({
+  users,
   onSuccess,
   onError,
 }) => {
@@ -24,6 +28,7 @@ export const PrivateMessageForm: React.FC<PrivateMessageFormProps> = ({
 
   const {
     register,
+    control,
     handleSubmit,
     formState: { errors },
     reset,
@@ -81,6 +86,11 @@ export const PrivateMessageForm: React.FC<PrivateMessageFormProps> = ({
 
   const messageLength = watch('content').length;
 
+  // const users = [
+  //   { name: 'Alice', id: 1 },
+  //   { name: 'Bob', id: 2 },
+  // ];
+
   return (
     <div className="max-w-2xl mx-auto p-6 bg-gray-50 dark:bg-gray-800 rounded-lg shadow-md">
       <h2 className="text-2xl font-semibold mb-6 text-center">Send Message</h2>
@@ -90,16 +100,43 @@ export const PrivateMessageForm: React.FC<PrivateMessageFormProps> = ({
           <label
             htmlFor="receiver"
             className="block text-sm font-medium text-gray-700 dark:text-gray-200"
-          >
-            To
-          </label>
+          ></label>
           <div className="mt-1">
-            <textarea
+            {/* <textarea
               id="receiver"
               rows={1}
               className="p-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-(--glint) focus:ring-(--glint) sm:text-sm"
               placeholder="Recipient..."
               {...register('receiver')}
+            /> */}
+            <Controller
+              name="receiver"
+              control={control}
+              render={({ field }) => (
+                <Autocomplete
+                  options={users}
+                  autoHighlight
+                  autoSelect
+                  value={
+                    users.find(
+                      (user) => String(user.username) === field.value
+                    ) ?? null
+                  }
+                  getOptionLabel={(option) => option.username}
+                  getOptionKey={(option) => String(option.id)}
+                  onChange={(_, value) => {
+                    field.onChange(value ? String(value.username) : '');
+                  }}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label="To"
+                      error={!!errors.receiver}
+                      helperText={errors.receiver?.message}
+                    />
+                  )}
+                />
+              )}
             />
           </div>
           {errors.receiver && (
@@ -107,9 +144,6 @@ export const PrivateMessageForm: React.FC<PrivateMessageFormProps> = ({
               {errors.receiver.message}
             </p>
           )}
-          <div className="mt-1 text-xs text-gray-500 text-right">
-            {watch('receiver')?.length || 0}/500
-          </div>
         </div>
 
         <div>

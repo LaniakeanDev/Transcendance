@@ -1,11 +1,7 @@
 import { z } from 'zod';
 
 export const privateMessageSchema = z.object({
-  receiver: z
-    .string()
-    .trim()
-    .min(1, 'Please enter a recipient')
-    .max(500, 'recipient cannot exceed 500 characters'),
+  receiver: z.string().trim().min(1, 'Please enter a recipient'),
 
   content: z
     .string()
