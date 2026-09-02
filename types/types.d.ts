@@ -20,6 +20,38 @@ type CommentWithUserInfo = Prisma.CommentGetPayload<{
   };
 }>;
 
+export type UserSearchResult = Prisma.UserGetPayload<{
+  select: {
+    id: true;
+    username: true;
+    avatarUrl: true;
+    bio: true;
+    createdAt: true;
+  };
+}>;
+
+export type PostSearchResult = Prisma.PostGetPayload<{
+  select: {
+    id: true;
+    imageUrl: true;
+    caption: true;
+    createdAt: true;
+    user: {
+      select: {
+        id: true;
+        username: true;
+        avatarUrl: true;
+      };
+    };
+    _count: {
+      select: {
+        likes: true;
+        comments: true;
+      };
+    };
+  };
+}>;
+
 type PostWithRelations = Prisma.PostGetPayload<{
   select: {
     id: true;
