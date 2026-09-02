@@ -47,6 +47,7 @@ const getInitialLikeStatus = (
 
 export default function GlintPost(props: GlintPostProps) {
   const { post, userId } = props;
+  const commentsRegionId = `comments-${post.id}`;
   const initialLikeStatus = getInitialLikeStatus(userId, post);
   const [isLiked, setIsLiked] = useState(initialLikeStatus);
   const [likesCount, setLikesCount] = useState(post.likes.length);
@@ -107,9 +108,7 @@ export default function GlintPost(props: GlintPostProps) {
       }
       const data = await response.json();
       const comment = data.comment;
-      const allComments = comments;
-      allComments.push(comment);
-      setComments(allComments);
+      setComments([...comments, comment]);
     } catch (error) {
       // setIsLiked(!newLiked);
       // setLikesCount((prev: number) => (newLiked ? prev - 1 : prev + 1));
@@ -119,7 +118,7 @@ export default function GlintPost(props: GlintPostProps) {
   }
 
   return (
-    <div className="max-w-md mx-auto border border-gray-200 dark:border-gray-600 rounded-lg overflow-hidden mb-8">
+    <div className="max-w-md mx-auto border border-[#8c95a6] dark:border-[#535f71] rounded-lg overflow-hidden mb-8">
       {/* Header - User Info */}
       <div className="flex items-center p-3">
         <div className="w-8 h-8 rounded-full overflow-hidden bg-linear-to-r from-(--glint)/80 to-(--glint) p-0.5">
@@ -145,8 +144,16 @@ export default function GlintPost(props: GlintPostProps) {
             • {formatTimeAgo(post.createdAt)}
           </span>
         </div>
-        <button className="text-gray-600 dark:text-gray-300">
-          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+        <button
+          aria-label="Post options"
+          className="p-3 -m-3 text-gray-600 dark:text-gray-300"
+        >
+          <svg
+            className="w-5 h-5"
+            fill="currentColor"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+          >
             <circle cx="12" cy="5" r="2" />
             <circle cx="12" cy="12" r="2" />
             <circle cx="12" cy="19" r="2" />
@@ -171,13 +178,16 @@ export default function GlintPost(props: GlintPostProps) {
         <div className="flex items-center">
           <button
             onClick={handleLike}
-            className="p-1 hover:bg-gray-100 hover:dark:bg-gray-600 cursor-pointer rounded-full transition-colors"
+            aria-label={isLiked ? 'Unlike' : 'Like'}
+            aria-pressed={isLiked}
+            className="p-2.5 -m-1.5 hover:bg-gray-100 hover:dark:bg-gray-600 cursor-pointer rounded-full transition-colors"
           >
             {isLiked ? (
               <svg
                 className="w-6 h-6 text-red-500"
                 fill="currentColor"
                 viewBox="0 0 24 24"
+                aria-hidden="true"
               >
                 <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
               </svg>
@@ -187,6 +197,7 @@ export default function GlintPost(props: GlintPostProps) {
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
+                aria-hidden="true"
               >
                 <path
                   strokeLinecap="round"
@@ -197,18 +208,25 @@ export default function GlintPost(props: GlintPostProps) {
               </svg>
             )}
           </button>
-          <p className="text-sm">{likesCount}</p>
+          <p className="text-sm">
+            {likesCount}
+            <span className="sr-only"> likes</span>
+          </p>
         </div>
         <div className="flex items-center">
           <button
             onClick={() => setShowComments(!showComments)}
-            className="p-1 hover:bg-gray-100 hover:dark:bg-gray-600 cursor-pointer rounded-full transition-colors"
+            aria-label={showComments ? 'Hide comments' : 'Show comments'}
+            aria-expanded={showComments}
+            aria-controls={commentsRegionId}
+            className="p-2.5 -m-1.5 hover:bg-gray-100 hover:dark:bg-gray-600 cursor-pointer rounded-full transition-colors"
           >
             <svg
               className="w-6 h-6"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
+              aria-hidden="true"
             >
               <path
                 strokeLinecap="round"
@@ -218,7 +236,10 @@ export default function GlintPost(props: GlintPostProps) {
               />
             </svg>
           </button>
-          <p className="text-sm">{comments.length}</p>
+          <p className="text-sm">
+            {comments.length}
+            <span className="sr-only"> comments</span>
+          </p>
         </div>
       </div>
 
@@ -237,12 +258,18 @@ export default function GlintPost(props: GlintPostProps) {
         <div className="px-3 pb-1">
           <button
             onClick={() => setShowComments(!showComments)}
+            aria-expanded={showComments}
+            aria-controls={commentsRegionId}
             className="text-xs text-gray-500 cursor-pointer"
           >
             {showComments ? 'Hide' : 'View all'} {comments.length} comments
           </button>
           {showComments && (
-            <div className="mt-2 space-y-1 max-h-40 overflow-y-auto">
+            <div
+              id={commentsRegionId}
+              aria-live="polite"
+              className="mt-2 space-y-1 max-h-40 overflow-y-auto"
+            >
               {comments.map((comment) => (
                 <div key={comment.id} className="text-sm">
                   <span className="font-semibold">{comment.user.username}</span>
@@ -256,7 +283,7 @@ export default function GlintPost(props: GlintPostProps) {
 
       {/* Timestamp */}
       <div className="px-3 pb-1">
-        <span className="text-xs text-gray-400 uppercase">
+        <span className="text-xs text-[#6c778a] dark:text-gray-400 uppercase">
           {post.createdAt.toLocaleDateString('en-US', {
             month: 'long',
             day: 'numeric',
@@ -275,6 +302,7 @@ export default function GlintPost(props: GlintPostProps) {
           value={commentText}
           onChange={(e) => setCommentText(e.target.value)}
           placeholder="Add a comment..."
+          aria-label="Add a comment"
           className="flex-1 text-sm outline-none"
         />
         <button
@@ -282,8 +310,8 @@ export default function GlintPost(props: GlintPostProps) {
           disabled={!commentText.trim()}
           className={`ml-2 text-sm font-semibold ${
             commentText.trim()
-              ? 'text-blue-500 hover:text-blue-600 cursor-pointer'
-              : 'text-gray-400 cursor-not-allowed'
+              ? 'text-[#0c6dff] dark:text-blue-500 hover:text-blue-600 cursor-pointer'
+              : 'text-[#6c778a] dark:text-gray-400 cursor-not-allowed'
           }`}
         >
           Post

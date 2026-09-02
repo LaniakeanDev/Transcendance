@@ -1,15 +1,20 @@
+import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 import { getCurrentUser } from '@/lib/session';
 import EditProfileForm from '@/components/EditProfileForm';
+
+export const metadata: Metadata = {
+  title: 'Edit profile',
+};
 
 export default async function EditProfilePage() {
   const user = await getCurrentUser();
   if (!user) redirect('/login');
 
   return (
-    <main className="mx-auto max-w-lg px-4 py-10">
+    <main id="main-content" className="mx-auto max-w-lg px-4 py-10">
       <h1 className="text-xl font-semibold">Edit profile</h1>
-      <p className="mt-1 text-sm text-neutral-500">
+      <p className="mt-1 text-sm text-neutral-500 dark:text-[#7b7b7b]">
         Update your public profile information.
       </p>
 

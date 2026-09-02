@@ -130,7 +130,7 @@ export const PostForm: React.FC<PostFormProps> = ({ onSuccess, onError }) => {
             ) : (
               <div className="text-center">
                 <svg
-                  className="mx-auto h-12 w-12 text-gray-400"
+                  className="mx-auto h-12 w-12 text-[#6c778a] dark:text-gray-400"
                   stroke="currentColor"
                   fill="none"
                   viewBox="0 0 48 48"
@@ -146,13 +146,17 @@ export const PostForm: React.FC<PostFormProps> = ({ onSuccess, onError }) => {
                 <div className="mt-4 flex text-sm text-gray-600">
                   <label
                     htmlFor="image-upload"
-                    className="relative cursor-pointer rounded-md font-medium text-(--glint) hover:text-(--glint) focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-b(--glint)"
+                    className="relative cursor-pointer rounded-md font-medium text-[#906e01] dark:text-(--glint) hover:text-(--glint) focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-b(--glint)"
                   >
                     <span>Upload an image</span>
                     <input
                       id="image-upload"
                       type="file"
                       accept="image/*"
+                      aria-invalid={!!errors.image}
+                      aria-describedby={
+                        errors.image ? 'image-error' : undefined
+                      }
                       className="sr-only"
                       {...register('image', {
                         onChange: handleImageChange,
@@ -169,7 +173,10 @@ export const PostForm: React.FC<PostFormProps> = ({ onSuccess, onError }) => {
           </div>
           {errors.image?.message &&
             typeof errors.image.message === 'string' && (
-              <p className="mt-2 text-sm text-red-600">
+              <p
+                id="image-error"
+                className="mt-2 text-sm text-red-600 dark:text-[#ff4e56]"
+              >
                 {errors.image.message}
               </p>
             )}
@@ -186,13 +193,18 @@ export const PostForm: React.FC<PostFormProps> = ({ onSuccess, onError }) => {
             <textarea
               id="caption"
               rows={4}
+              aria-invalid={!!errors.caption}
+              aria-describedby={errors.caption ? 'caption-error' : undefined}
               className="p-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-(--glint) focus:ring-(--glint) sm:text-sm"
               placeholder="Your caption..."
               {...register('caption')}
             />
           </div>
           {errors.caption && (
-            <p className="mt-2 text-sm text-red-600">
+            <p
+              id="caption-error"
+              className="mt-2 text-sm text-red-600 dark:text-[#ff4e56]"
+            >
               {errors.caption.message}
             </p>
           )}
@@ -203,7 +215,7 @@ export const PostForm: React.FC<PostFormProps> = ({ onSuccess, onError }) => {
 
         {/* Error Message */}
         {errors.root && (
-          <div className="rounded-md bg-red-50 p-4">
+          <div role="alert" className="rounded-md bg-red-50 p-4">
             <p className="text-sm text-red-700">{errors.root.message}</p>
           </div>
         )}

@@ -113,16 +113,23 @@ export default function EditProfileForm({
         <input
           id="username"
           type="text"
+          aria-invalid={!!errors.username}
+          aria-describedby={errors.username ? 'username-error' : undefined}
           {...register('username')}
-          className="mt-1 w-full rounded-md border border-neutral-300 px-3 py-2 text-sm focus:border-neutral-500 focus:outline-none"
+          className="mt-1 w-full rounded-md border border-[#949494] px-3 py-2 text-sm focus:border-neutral-500 focus:outline-none"
         />
         {errors.username && (
-          <p className="mt-1 text-sm text-red-600">{errors.username.message}</p>
+          <p
+            id="username-error"
+            className="mt-1 text-sm text-red-600 dark:text-[#f6000c]"
+          >
+            {errors.username.message}
+          </p>
         )}
       </div>
 
-      <div>
-        <label className="block text-sm font-medium">Avatar</label>
+      <fieldset className="m-0 border-0 p-0">
+        <legend className="block p-0 text-sm font-medium">Avatar</legend>
 
         {preview && (
           <img
@@ -136,10 +143,11 @@ export default function EditProfileForm({
           <button
             type="button"
             onClick={() => setAvatarMode('url')}
+            aria-pressed={avatarMode === 'url'}
             className={`rounded-md px-3 py-1 ${
               avatarMode === 'url'
                 ? 'bg-neutral-900 text-white'
-                : 'border border-neutral-300 text-neutral-600'
+                : 'border border-[#949494] text-neutral-600 dark:text-[#7b7b7b]'
             }`}
           >
             Paste a link
@@ -147,10 +155,11 @@ export default function EditProfileForm({
           <button
             type="button"
             onClick={() => setAvatarMode('upload')}
+            aria-pressed={avatarMode === 'upload'}
             className={`rounded-md px-3 py-1 ${
               avatarMode === 'upload'
                 ? 'bg-neutral-900 text-white'
-                : 'border border-neutral-300 text-neutral-600'
+                : 'border border-[#949494] text-neutral-600 dark:text-[#7b7b7b]'
             }`}
           >
             Upload an image
@@ -158,38 +167,60 @@ export default function EditProfileForm({
         </div>
 
         {avatarMode === 'url' ? (
-          <input
-            type="text"
-            placeholder="https://example.com/avatar.jpg"
-            {...register('avatarUrl')}
-            onChange={(e) => {
-              setPreview(e.target.value);
-            }}
-            className="mt-2 w-full rounded-md border border-neutral-300 px-3 py-2 text-sm focus:border-neutral-500 focus:outline-none"
-          />
+          <>
+            <label htmlFor="avatarUrl" className="sr-only">
+              Avatar URL
+            </label>
+            <input
+              id="avatarUrl"
+              type="text"
+              placeholder="https://example.com/avatar.jpg"
+              aria-invalid={!!errors.avatarUrl}
+              aria-describedby={
+                errors.avatarUrl ? 'avatarUrl-error' : undefined
+              }
+              {...register('avatarUrl')}
+              onChange={(e) => {
+                setPreview(e.target.value);
+              }}
+              className="mt-2 w-full rounded-md border border-[#949494] px-3 py-2 text-sm focus:border-neutral-500 focus:outline-none"
+            />
+          </>
         ) : (
-          <input
-            type="file"
-            accept="image/jpeg,image/png,image/webp,image/gif"
-            onChange={handleFileChange}
-            disabled={uploading}
-            className="mt-2 w-full text-sm"
-          />
+          <>
+            <label htmlFor="avatarFile" className="sr-only">
+              Avatar image file
+            </label>
+            <input
+              id="avatarFile"
+              type="file"
+              accept="image/jpeg,image/png,image/webp,image/gif"
+              onChange={handleFileChange}
+              disabled={uploading}
+              className="mt-2 w-full text-sm"
+            />
+          </>
         )}
 
         {uploading && (
-          <p className="mt-1 text-sm text-neutral-500">
+          <p
+            role="status"
+            className="mt-1 text-sm text-neutral-500 dark:text-[#7b7b7b]"
+          >
             Compressing and uploading...
           </p>
         )}
         {errors.avatarUrl && (
-          <p className="mt-1 text-sm text-red-600">
+          <p
+            id="avatarUrl-error"
+            className="mt-1 text-sm text-red-600 dark:text-[#f6000c]"
+          >
             {errors.avatarUrl.message}
           </p>
         )}
 
         <input type="hidden" value={avatarUrlValue} readOnly />
-      </div>
+      </fieldset>
 
       <div>
         <label htmlFor="bio" className="block text-sm font-medium">
@@ -198,22 +229,33 @@ export default function EditProfileForm({
         <textarea
           id="bio"
           rows={3}
+          aria-invalid={!!errors.bio}
+          aria-describedby={errors.bio ? 'bio-error' : undefined}
           {...register('bio')}
-          className="mt-1 w-full resize-none rounded-md border border-neutral-300 px-3 py-2 text-sm focus:border-neutral-500 focus:outline-none"
+          className="mt-1 w-full resize-none rounded-md border border-[#949494] px-3 py-2 text-sm focus:border-neutral-500 focus:outline-none"
         />
         <div className="mt-1 flex items-center justify-between">
           {errors.bio ? (
-            <p className="text-sm text-red-600">{errors.bio.message}</p>
+            <p
+              id="bio-error"
+              className="text-sm text-red-600 dark:text-[#f6000c]"
+            >
+              {errors.bio.message}
+            </p>
           ) : (
             <span />
           )}
-          <span className="text-xs text-neutral-400">
+          <span className="text-xs text-[#767676] dark:text-neutral-400">
             {bioValue.length}/160
           </span>
         </div>
       </div>
 
-      {serverError && <p className="text-sm text-red-600">{serverError}</p>}
+      {serverError && (
+        <p role="alert" className="text-sm text-red-600 dark:text-[#f6000c]">
+          {serverError}
+        </p>
+      )}
 
       <div className="flex gap-3">
         <button
@@ -226,7 +268,7 @@ export default function EditProfileForm({
         <button
           type="button"
           onClick={() => router.back()}
-          className="rounded-md border border-neutral-300 px-4 py-2 text-sm font-medium hover:bg-neutral-50"
+          className="rounded-md border border-[#949494] px-4 py-2 text-sm font-medium hover:bg-neutral-50"
         >
           Cancel
         </button>

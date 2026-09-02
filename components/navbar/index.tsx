@@ -13,13 +13,21 @@ export default function Navbar() {
           className="flex items-center gap-2 hover:opacity-80 transition-opacity"
         >
           <Logo size={40} />
-          <h1 className="text-3xl">Glint</h1>
+          <span className="text-3xl">Glint</span>
         </Link>
         <div className="flex flex-row gap-4">
-          <Link href="/profile" className="hover:opacity-70 transition-opacity">
+          <Link
+            href="/profile"
+            aria-label="Your profile"
+            className="p-0.5 -m-0.5 hover:opacity-70 transition-opacity"
+          >
             <UserIcon size={40} />
           </Link>
-          <Link href="/post" className="hover:opacity-70 transition-opacity">
+          <Link
+            href="/post"
+            aria-label="Create post"
+            className="p-0.5 -m-0.5 hover:opacity-70 transition-opacity"
+          >
             <PlusIcon size={40} />
           </Link>
         </div>

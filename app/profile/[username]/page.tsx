@@ -1,9 +1,19 @@
+import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import { prisma } from '@/lib/prisma';
 import { getCurrentUser } from '@/lib/session';
 import LogoutButton from '@/components/LogoutButton';
 import Link from 'next/link';
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ username: string }>;
+}): Promise<Metadata> {
+  const { username } = await params;
+  return { title: username };
+}
 
 export default async function ProfilePage({
   params,
@@ -36,7 +46,7 @@ export default async function ProfilePage({
   ]);
 
   return (
-    <main className="mx-auto max-w-3xl px-4 py-10">
+    <main id="main-content" className="mx-auto max-w-3xl px-4 py-10">
       <div className="flex items-center gap-8 border-b border-neutral-200 pb-8">
         <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-full bg-neutral-100 ring-1 ring-neutral-200 sm:h-32 sm:w-32">
           {profileUser.avatarUrl ? (
@@ -49,7 +59,7 @@ export default async function ProfilePage({
               className="object-cover"
             />
           ) : (
-            <div className="flex h-full w-full items-center justify-center text-2xl font-semibold text-neutral-400">
+            <div className="flex h-full w-full items-center justify-center text-2xl font-semibold text-[#6e6e6e]">
               {profileUser.username.slice(0, 1).toUpperCase()}
             </div>
           )}
@@ -63,7 +73,7 @@ export default async function ProfilePage({
               <>
                 <Link
                   href="/profile/edit"
-                  className="rounded-md border border-neutral-300 px-4 py-1.5 text-sm font-medium hover:bg-neutral-50 hover:dark:bg-neutral-800"
+                  className="rounded-md border border-[#949494] px-4 py-1.5 text-sm font-medium hover:bg-neutral-50 hover:dark:bg-neutral-800"
                 >
                   Edit profile
                 </Link>
@@ -75,20 +85,24 @@ export default async function ProfilePage({
           <dl className="mt-4 flex gap-8 text-sm">
             <div className="flex items-center gap-1.5">
               <dd className="font-semibold">{postCount}</dd>
-              <dt className="text-neutral-500">posts</dt>
+              <dt className="text-neutral-500 dark:text-[#7b7b7b]">posts</dt>
             </div>
             <div className="flex items-center gap-1.5">
               <dd className="font-semibold">{likesReceived}</dd>
-              <dt className="text-neutral-500">likes received</dt>
+              <dt className="text-neutral-500 dark:text-[#7b7b7b]">
+                likes received
+              </dt>
             </div>
             <div className="flex items-center gap-1.5">
               <dd className="font-semibold">{commentsReceived}</dd>
-              <dt className="text-neutral-500">comments received</dt>
+              <dt className="text-neutral-500 dark:text-[#7b7b7b]">
+                comments received
+              </dt>
             </div>
           </dl>
 
           {profileUser.bio && (
-            <p className="mt-4 max-w-md text-sm text-neutral-700">
+            <p className="mt-4 max-w-md text-sm text-neutral-700 dark:text-[#7b7b7b]">
               {profileUser.bio}
             </p>
           )}
@@ -99,7 +113,7 @@ export default async function ProfilePage({
         {posts.length === 0 ? (
           <div className="flex flex-col items-center gap-2 py-20 text-center">
             <p className="text-lg font-medium">No posts yet</p>
-            <p className="text-sm text-neutral-500">
+            <p className="text-sm text-neutral-500 dark:text-[#7b7b7b]">
               {isOwnProfile
                 ? 'Posts you share will appear here.'
                 : `${profileUser.username} hasn't posted anything yet.`}
@@ -123,7 +137,7 @@ export default async function ProfilePage({
                     className="object-cover transition group-hover:opacity-90"
                   />
                 ) : (
-                  <div className="flex h-full w-full items-center justify-center text-xs text-neutral-400">
+                  <div className="flex h-full w-full items-center justify-center text-xs text-[#6e6e6e]">
                     No image
                   </div>
                 )}

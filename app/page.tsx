@@ -48,7 +48,7 @@ export default async function Home() {
     },
   });
   return (
-    <main className="">
+    <main id="main-content" className="">
       {posts.map((post) => (
         <GlintPost key={post.id} post={post} userId={user.id} />
       ))}
