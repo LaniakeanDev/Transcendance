@@ -52,7 +52,7 @@ export const PostForm: React.FC<PostFormProps> = ({ onSuccess, onError }) => {
         formData.append('caption', data.caption);
       }
 
-      // Make API call to your backend
+      // Make API call
       const response = await fetch('/api/post', {
         method: 'POST',
         body: formData,
