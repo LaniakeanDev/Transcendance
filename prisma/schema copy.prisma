@@ -10,9 +10,7 @@ model User {
   id            String   @id @default(uuid()) @db.Uuid
   username      String   @unique
   email         String   @unique
-  passwordHash  String?  @map("password_hash")
-  provider      String   @default("local")
-  providerId    String?  @map("provider_id")
+  passwordHash  String   @map("password_hash")
   bio           String?
   avatarUrl     String?  @map("avatar_url")
   createdAt     DateTime @default(now()) @map("created_at")
@@ -26,7 +24,6 @@ model User {
   friendships1 Friendship[] @relation("FriendshipUser1")
   friendships2 Friendship[] @relation("FriendshipUser2")
 
-  @@unique([provider, providerId])
   @@map("users")
 }
 

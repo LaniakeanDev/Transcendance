@@ -1,20 +1,22 @@
 import { prisma } from '@/lib/prisma';
 import { getCurrentUser } from '@/lib/session';
+import MessageRealtime from '@/components/message-real-time';
 
-const messages_mockup = [
-  'hi',
-  'hello',
-  'coucou',
-  'hello',
-  'coucou',
-  'hello',
-  'coucou',
-  'hello',
-  'coucou',
-];
+// const messages_mockup = [
+//   'hi',
+//   'hello',
+//   'coucou',
+//   'hello',
+//   'coucou',
+//   'hello',
+//   'coucou',
+//   'hello',
+//   'coucou',
+// ];
 
 export default async function MessageHistory() {
   const user = await getCurrentUser();
+
   const messages = user
     ? await prisma.message.findMany({
         where: {
@@ -42,6 +44,7 @@ export default async function MessageHistory() {
 
   return (
     <div>
+      <MessageRealtime />
       <div className="w-19/20 mx-auto p-6 bg-gray-50 dark:bg-gray-800 rounded-lg shadow-md h-200 overflow-y-auto">
         <h2 className="text-2xl font-semibold mb-6 text-center">MESSAGES</h2>
         <div className="flex flex-col gap-4">
