@@ -30,6 +30,7 @@ const formatTimeAgo = (date: Date): string => {
 interface GlintPostProps {
   post: PostWithRelations;
   userId: string;
+  size?: 'default' | 'large';
   // onLike?: (postId: string) => void;
   // onComment?: (postId: string, text: string) => void;
 }
@@ -47,7 +48,8 @@ const getInitialLikeStatus = (
 };
 
 export default function GlintPost(props: GlintPostProps) {
-  const { post, userId } = props;
+  const { post, userId, size = 'default' } = props;
+  const isLarge = size === 'large';
   const initialLikeStatus = getInitialLikeStatus(userId, post);
   const [isLiked, setIsLiked] = useState(initialLikeStatus);
   const [likesCount, setLikesCount] = useState(post.likes.length);
@@ -171,7 +173,11 @@ export default function GlintPost(props: GlintPostProps) {
   }
 
   return (
-    <div className="max-w-md mx-auto border border-gray-200 dark:border-gray-600 rounded-lg overflow-hidden mb-8">
+    <div
+      className={`${
+        isLarge ? 'max-w-3xl' : 'max-w-md'
+      } mx-auto border border-gray-200 dark:border-gray-600 rounded-lg overflow-hidden mb-8`}
+    >
       {/* Header - User Info */}
       <div className="flex items-center p-3">
         <div className="w-8 h-8 rounded-full overflow-hidden bg-linear-to-r from-(--glint)/80 to-(--glint) p-0.5">
@@ -247,7 +253,11 @@ export default function GlintPost(props: GlintPostProps) {
           fill
           priority
           className="object-cover"
-          sizes="(max-width: 640px) 100vw, 640px"
+          sizes={
+            isLarge
+              ? '(max-width: 768px) 100vw, 768px'
+              : '(max-width: 448px) 100vw, 448px'
+          }
         />
       </div>
 
