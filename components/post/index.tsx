@@ -129,7 +129,8 @@ export default function GlintPost(props: GlintPostProps) {
         throw new Error(errorData.message || 'Failed to delete post');
       }
       setShowDeleteConfirm(false);
-      // Re-run the server component so the post leaves the feed
+      // Leave the post page, which would 404 now, and reload the feed without it
+      router.replace('/');
       router.refresh();
     } catch (error) {
       console.error('Error deleting post:', error);
