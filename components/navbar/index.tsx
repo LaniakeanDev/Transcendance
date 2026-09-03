@@ -3,6 +3,7 @@ import Logo from '@/public/logo';
 import UserIcon from '@/public/user';
 import PlusIcon from '@/public/plus';
 import MessageIcon from '@/public/message';
+import SearchIcon from '@/public/search';
 
 export default function Navbar() {
   return (
@@ -17,6 +18,13 @@ export default function Navbar() {
           <h1 className="text-3xl">Glint</h1>
         </Link>
         <div className="flex flex-row gap-4">
+          <Link
+            href="/search"
+            aria-label="Search"
+            className="hover:opacity-70 transition-opacity"
+          >
+            <SearchIcon size={40} />
+          </Link>
           <Link href="/profile" className="hover:opacity-70 transition-opacity">
             <UserIcon size={40} />
           </Link>
