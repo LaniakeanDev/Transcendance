@@ -1,6 +1,7 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import { PostWithRelations, CommentWithUserInfo } from '@/types/types';
 
 // Format time helper
@@ -29,6 +30,7 @@ const formatTimeAgo = (date: Date): string => {
 interface GlintPostProps {
   post: PostWithRelations;
   userId: string;
+  size?: 'default' | 'large';
   // onLike?: (postId: string) => void;
   // onComment?: (postId: string, text: string) => void;
 }
@@ -46,13 +48,44 @@ const getInitialLikeStatus = (
 };
 
 export default function GlintPost(props: GlintPostProps) {
-  const { post, userId } = props;
+  const { post, userId, size = 'default' } = props;
+  const isLarge = size === 'large';
   const initialLikeStatus = getInitialLikeStatus(userId, post);
   const [isLiked, setIsLiked] = useState(initialLikeStatus);
   const [likesCount, setLikesCount] = useState(post.likes.length);
   const [commentText, setCommentText] = useState('');
   const [showComments, setShowComments] = useState(false);
   const [comments, setComments] = useState(post.comments);
+  const [showMenu, setShowMenu] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const isOwner = post.userId === userId;
+  const router = useRouter();
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  // Close the menu when clicking outside of it
+  useEffect(() => {
+    if (!showMenu) return;
+    function handleClickOutside(event: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setShowMenu(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showMenu]);
+
+  // Close the confirmation dialog on Escape, unless a delete is in flight
+  useEffect(() => {
+    if (!showDeleteConfirm || isDeleting) return;
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === 'Escape') {
+        setShowDeleteConfirm(false);
+      }
+    }
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [showDeleteConfirm, isDeleting]);
 
   async function handleLike() {
     const newLiked = !isLiked;
@@ -80,6 +113,28 @@ export default function GlintPost(props: GlintPostProps) {
       setIsLiked(!newLiked);
       setLikesCount((prev: number) => (newLiked ? prev - 1 : prev + 1));
       console.error('Error liking post:', error);
+    }
+  }
+
+  async function handleDelete() {
+    setIsDeleting(true);
+    try {
+      const response = await fetch('/api/post', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ postId: post.id }),
+      });
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to delete post');
+      }
+      setShowDeleteConfirm(false);
+      // Leave the post page, which would 404 now, and reload the feed without it
+      router.replace('/');
+      router.refresh();
+    } catch (error) {
+      console.error('Error deleting post:', error);
+      setIsDeleting(false);
     }
   }
 
@@ -119,7 +174,11 @@ export default function GlintPost(props: GlintPostProps) {
   }
 
   return (
-    <div className="max-w-md mx-auto border border-gray-200 dark:border-gray-600 rounded-lg overflow-hidden mb-8">
+    <div
+      className={`${
+        isLarge ? 'max-w-3xl' : 'max-w-md'
+      } mx-auto border border-gray-200 dark:border-gray-600 rounded-lg overflow-hidden mb-8`}
+    >
       {/* Header - User Info */}
       <div className="flex items-center p-3">
         <div className="w-8 h-8 rounded-full overflow-hidden bg-linear-to-r from-(--glint)/80 to-(--glint) p-0.5">
@@ -140,18 +199,53 @@ export default function GlintPost(props: GlintPostProps) {
           </div>
         </div>
         <div className="ml-3 flex-1">
-          <span className="font-semibold text-sm">{post.user.username}</span>
+          <span className="font-semibold text-sm">
+            <a href={`/profile/${post.user.username}`}>{post.user.username}</a>
+          </span>
           <span className="text-xs text-gray-500 dark:text-gray-300 ml-2">
             • {formatTimeAgo(post.createdAt)}
           </span>
         </div>
-        <button className="text-gray-600 dark:text-gray-300">
-          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-            <circle cx="12" cy="5" r="2" />
-            <circle cx="12" cy="12" r="2" />
-            <circle cx="12" cy="19" r="2" />
-          </svg>
-        </button>
+        <div className="relative" ref={menuRef}>
+          <button
+            className="text-gray-600 dark:text-gray-300"
+            onClick={() => setShowMenu(!showMenu)}
+          >
+            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+              <circle cx="12" cy="5" r="2" />
+              <circle cx="12" cy="12" r="2" />
+              <circle cx="12" cy="19" r="2" />
+            </svg>
+          </button>
+
+          {showMenu && isOwner && (
+            <div className="absolute right-0 top-full mt-1 z-10 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg overflow-hidden">
+              <button
+                onClick={() => {
+                  setShowMenu(false);
+                  setShowDeleteConfirm(true);
+                }}
+                className="flex items-center gap-2 px-4 py-2 text-sm text-red-500 hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer w-full"
+              >
+                {/* icône corbeille */}
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                  />
+                </svg>
+                Delete
+              </button>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Image */}
@@ -162,7 +256,11 @@ export default function GlintPost(props: GlintPostProps) {
           fill
           priority
           className="object-cover"
-          sizes="(max-width: 640px) 100vw, 640px"
+          sizes={
+            isLarge
+              ? '(max-width: 768px) 100vw, 768px'
+              : '(max-width: 448px) 100vw, 448px'
+          }
         />
       </div>
 
@@ -289,6 +387,45 @@ export default function GlintPost(props: GlintPostProps) {
           Post
         </button>
       </form>
+
+      {/* Delete confirmation */}
+      {showDeleteConfirm && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+          onClick={() => !isDeleting && setShowDeleteConfirm(false)}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            className="max-w-sm w-full p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2 className="text-lg font-semibold">Delete post?</h2>
+            <p className="mt-2 text-sm text-gray-500 dark:text-gray-300">
+              This post and its comments will be permanently deleted. This
+              cannot be undone.
+            </p>
+            <div className="mt-6 flex justify-end space-x-3">
+              <button
+                type="button"
+                onClick={() => setShowDeleteConfirm(false)}
+                disabled={isDeleting}
+                className="px-4 py-2 cursor-pointer border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleDelete}
+                disabled={isDeleting}
+                className="px-4 py-2 cursor-pointer rounded-md shadow-sm text-sm font-medium text-white bg-red-500 hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isDeleting ? 'Deleting...' : 'Delete'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

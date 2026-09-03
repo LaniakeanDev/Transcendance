@@ -1,6 +1,7 @@
 'use client';
 
 import CookieConsent from 'react-cookie-consent';
+import Link from 'next/link';
 
 export default function CookieBanner() {
   return (
@@ -30,7 +31,11 @@ export default function CookieBanner() {
         padding: '8px 16px',
       }}
     >
-      Ce site utilise des cookies pour améliorer votre expérience.
+      Ce site utilise des cookies pour améliorer votre expérience. Voir notre{' '}
+      <Link href="/privacy" className="underline">
+        politique de confidentialité
+      </Link>
+      .
     </CookieConsent>
   );
 }
