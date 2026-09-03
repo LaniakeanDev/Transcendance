@@ -4,12 +4,7 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm, SubmitHandler, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import {
-  friendSchema,
-  FriendFormData,
-  friendshipSchema,
-  FriendshipFormData,
-} from '@/lib/validation/friend';
+import { friendSchema, FriendFormData } from '@/lib/validation/friend';
 import { Autocomplete, TextField } from '@mui/material';
 import { User } from '@prisma/client';
 

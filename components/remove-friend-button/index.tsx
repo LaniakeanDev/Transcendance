@@ -16,12 +16,6 @@ export default function RemoveFriendButton({
   const router = useRouter();
 
   const handleRemove = async () => {
-    const confirmed = window.confirm(
-      `Are you sure you want to remove ${friendUsername} as a friend?`
-    );
-
-    if (!confirmed) return;
-
     try {
       setIsRemoving(true);
 

@@ -53,7 +53,10 @@ export async function POST(request: NextRequest) {
     }
 
     if (user.id === validatedFriend.id) {
-      throw new Error('You cannot add yourself as a friend');
+      return NextResponse.json(
+        { message: 'Cannot befriend yourself' },
+        { status: 404 }
+      );
     }
 
     const [user1Id, user2Id] = [user.id, validatedFriend.id].sort();
@@ -85,100 +88,74 @@ export async function POST(request: NextRequest) {
   } catch (error: unknown) {
     console.error('Error creating friendship:', error);
     return NextResponse.json(
-      { message: 'Failed to create friendship' },
+      { message: 'Failed to create friendship (is already your friend?)' },
       { status: 500 }
     );
   }
 }
 
-export async function DELETE(request: NextRequest) {
+export async function DELETE(request: Request) {
   try {
     const user = await getCurrentUser();
 
     if (!user) {
-      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+      return Response.json({ message: 'Unauthorized' }, { status: 401 });
     }
 
-    const formData = await request.formData();
-    const friend = formData.get('friend') as string;
+    const { friendId } = await request.json();
 
-    // Validate with Zod
-    const validationResult = friendSchema.safeParse({
-      friend,
-    });
-
-    if (!validationResult.success) {
-      const errors = validationResult.error.issues.map((err) => err.message);
-
-      return NextResponse.json(
-        {
-          message: 'Validation failed',
-          errors,
-        },
+    if (!friendId || typeof friendId !== 'string') {
+      return Response.json(
+        { message: 'Friend ID is required' },
         { status: 400 }
       );
     }
 
-    const validatedFriend = await prisma.user.findUnique({
+    // Find the friendship regardless of which user is user1/user2
+    const friendship = await prisma.friendship.findFirst({
       where: {
-        username: validationResult.data.friend,
+        OR: [
+          {
+            user1Id: user.id,
+            user2Id: friendId,
+          },
+          {
+            user1Id: friendId,
+            user2Id: user.id,
+          },
+        ],
       },
       select: {
-        id: true,
+        user1Id: true,
+        user2Id: true,
       },
     });
 
-    if (!validatedFriend) {
-      return NextResponse.json({ message: 'User not found' }, { status: 404 });
-    }
-
-    if (user.id === validatedFriend.id) {
-      return NextResponse.json(
-        { message: 'You cannot remove yourself as a friend' },
-        { status: 400 }
-      );
-    }
-
-    // IMPORTANT:
-    // Use the same ordering that was used when creating
-    // the friendship.
-    const [user1Id, user2Id] = [user.id, validatedFriend.id].sort();
-
-    // Delete the friendship
-    const deletedFriendship = await prisma.friendship.delete({
-      where: {
-        user1Id_user2Id: {
-          user1Id,
-          user2Id,
-        },
-      },
-    });
-
-    return NextResponse.json(
-      {
-        message: 'Friendship deleted successfully',
-        friendship: deletedFriendship,
-      },
-      { status: 200 }
-    );
-  } catch (error: unknown) {
-    console.error('Error deleting friendship:', error);
-
-    // Friendship doesn't exist
-    if (
-      error &&
-      typeof error === 'object' &&
-      'code' in error &&
-      error.code === 'P2025'
-    ) {
-      return NextResponse.json(
+    if (!friendship) {
+      return Response.json(
         { message: 'Friendship not found' },
         { status: 404 }
       );
     }
 
-    return NextResponse.json(
-      { message: 'Failed to delete friendship' },
+    // Delete using the composite primary key
+    await prisma.friendship.delete({
+      where: {
+        user1Id_user2Id: {
+          user1Id: friendship.user1Id,
+          user2Id: friendship.user2Id,
+        },
+      },
+    });
+
+    return Response.json({
+      message: 'Friend removed successfully',
+    });
+  } catch (error) {
+    console.error('Error removing friend:', error);
+
+    return Response.json(
+      { message: 'Failed to remove friend' },
       { status: 500 }
     );
   }
