@@ -3,6 +3,11 @@ import { cookies } from 'next/headers';
 import { prisma } from '@/lib/prisma';
 import { createSessionToken } from '@/lib/auth';
 
+// Public origin of the app. `req.url` cannot be trusted here: behind the nginx
+// proxy the Next standalone server reports its bind address (0.0.0.0:3000), so
+// redirects built from it are unreachable by the browser.
+const BASE = process.env.OAUTH_REDIRECT_BASE;
+
 export async function GET(req: Request) {
   const url = new URL(req.url);
   const code = url.searchParams.get('code');
@@ -10,7 +15,7 @@ export async function GET(req: Request) {
   const savedState = (await cookies()).get('oauth_state')?.value;
 
   if (!code || !state || state !== savedState) {
-    return NextResponse.redirect(new URL('/login?error=oauth', req.url));
+    return NextResponse.redirect(new URL('/login?error=oauth', BASE));
   }
 
   const tokenRes = await fetch('https://oauth2.googleapis.com/token', {
@@ -26,7 +31,7 @@ export async function GET(req: Request) {
   });
   const tokens = await tokenRes.json();
   if (!tokens.access_token) {
-    return NextResponse.redirect(new URL('/login?error=oauth', req.url));
+    return NextResponse.redirect(new URL('/login?error=oauth', BASE));
   }
 
   const profile = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
@@ -34,7 +39,7 @@ export async function GET(req: Request) {
   }).then((r) => r.json());
 
   if (!profile.email || !profile.verified_email) {
-    return NextResponse.redirect(new URL('/login?error=oauth', req.url));
+    return NextResponse.redirect(new URL('/login?error=oauth', BASE));
   }
 
   let user = await prisma.user.findFirst({
@@ -61,7 +66,7 @@ export async function GET(req: Request) {
   }
 
   const token = await createSessionToken(user.id);
-  const res = NextResponse.redirect(new URL('/', req.url));
+  const res = NextResponse.redirect(new URL('/', BASE));
   res.cookies.set('session', token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',

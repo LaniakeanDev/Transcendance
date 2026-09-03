@@ -1,0 +1,16 @@
+# Opt-in one-shot tasks. Not part of the running stack.
+# Kept in a separate file because podman-compose (1.6) ignores `profiles`.
+#
+#   make migrate            # or:
+#   docker compose -f compose.tools.yaml run --rm migrate
+
+services:
+  # Apply Prisma migrations to the remote Supabase DB (via DIRECT_URL).
+  # Idempotent: does nothing if the DB is already up to date.
+  migrate:
+    build:
+      context: .
+      target: migrate
+    image: transcendance-migrate
+    env_file:
+      - .env
