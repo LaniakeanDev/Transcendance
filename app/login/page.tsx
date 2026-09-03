@@ -4,16 +4,11 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
 import Link from 'next/link';
 import Logo from '@/public/logo';
+import { loginSchema, type LoginFormData } from '@/lib/validation/auth';
 
-const loginSchema = z.object({
-  email: z.string().email('Invalid email'),
-  password: z.string().min(1, 'Password is required'),
-});
-
-type LoginForm = z.infer<typeof loginSchema>;
+type LoginForm = LoginFormData;
 
 export default function LoginPage() {
   const [serverError, setServerError] = useState<string | null>(null);

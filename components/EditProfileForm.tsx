@@ -138,7 +138,7 @@ export default function EditProfileForm({
             onClick={() => setAvatarMode('url')}
             className={`rounded-md px-3 py-1 ${
               avatarMode === 'url'
-                ? 'bg-neutral-900 text-white'
+                ? 'bg-(--glint) text-black'
                 : 'border border-neutral-300 text-neutral-600'
             }`}
           >
@@ -149,7 +149,7 @@ export default function EditProfileForm({
             onClick={() => setAvatarMode('upload')}
             className={`rounded-md px-3 py-1 ${
               avatarMode === 'upload'
-                ? 'bg-neutral-900 text-white'
+                ? 'bg-(--glint) text-black'
                 : 'border border-neutral-300 text-neutral-600'
             }`}
           >
@@ -219,7 +219,7 @@ export default function EditProfileForm({
         <button
           type="submit"
           disabled={isSubmitting || uploading}
-          className="rounded-md bg-neutral-900 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-800 disabled:opacity-50"
+          className="rounded-md bg-(--glint) px-4 py-2 text-sm font-medium text-black hover:bg-(--glint)/80 disabled:opacity-50"
         >
           {isSubmitting ? 'Saving...' : 'Save changes'}
         </button>
