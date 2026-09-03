@@ -37,6 +37,9 @@ export default function Navbar() {
           >
             <MessageIcon size={40} />
           </Link>
+          <Link href="/friends" className="hover:opacity-70 transition-opacity">
+            <MessageIcon size={40} />
+          </Link>
         </div>
       </div>
     </nav>
