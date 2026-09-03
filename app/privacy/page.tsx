@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 
 // TODO: replace with the real contact address before going live
-const CONTACT_EMAIL = 'contact@example.com';
+const CONTACT_EMAIL = 'contact@glint.com';
 const LAST_UPDATED = 'September 3, 2026';
 
 export const metadata: Metadata = {
