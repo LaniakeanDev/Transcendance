@@ -1,9 +1,18 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyPassword, createSessionToken } from '@/lib/auth';
+import { loginSchema } from '@/lib/validation/auth';
 
 export async function POST(req: Request) {
-  const { email, password } = await req.json();
+  const body = await req.json();
+
+  const validationResult = loginSchema.safeParse(body);
+  if (!validationResult.success) {
+    const errors = validationResult.error.issues.map((err) => err.message);
+    return NextResponse.json({ error: errors[0], errors }, { status: 400 });
+  }
+
+  const { email, password } = validationResult.data;
 
   const user = await prisma.user.findUnique({ where: { email } });
   if (!user) {

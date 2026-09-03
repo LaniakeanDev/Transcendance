@@ -1,13 +1,18 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { hashPassword, createSessionToken } from '@/lib/auth';
+import { signupSchema } from '@/lib/validation/auth';
 
 export async function POST(req: Request) {
-  const { email, username, password } = await req.json();
+  const body = await req.json();
 
-  if (!email || !username || !password) {
-    return NextResponse.json({ error: 'Missing fields' }, { status: 400 });
+  const validationResult = signupSchema.safeParse(body);
+  if (!validationResult.success) {
+    const errors = validationResult.error.issues.map((err) => err.message);
+    return NextResponse.json({ error: errors[0], errors }, { status: 400 });
   }
+
+  const { email, username, password } = validationResult.data;
 
   const existingEmail = await prisma.user.findUnique({
     where: { email },

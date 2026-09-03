@@ -4,17 +4,11 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
 import Link from 'next/link';
 import Logo from '@/public/logo';
+import { signupSchema, type SignupFormData } from '@/lib/validation/auth';
 
-const signupSchema = z.object({
-  email: z.string().email('Invalid email'),
-  username: z.string().min(3, 'Username must be at least 3 characters'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
-});
-
-type SignupForm = z.infer<typeof signupSchema>;
+type SignupForm = SignupFormData;
 
 export default function SignupPage() {
   const [serverError, setServerError] = useState<string | null>(null);
