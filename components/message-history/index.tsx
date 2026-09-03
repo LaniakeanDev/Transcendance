@@ -62,7 +62,8 @@ export default async function MessageHistory() {
                 }).format(item.createdAt)}
               </label>
 
-              <div className="block w-19/20 mx-auto p-3 bg-white dark:bg-gray-800 rounded-lg shadow-xl">
+              {/* <div className="block w-19/20 mx-auto p-3 bg-white dark:bg-gray-800 rounded-lg shadow-xl"> */}
+              <div className="block w-19/20 mx-auto p-3 bg-white dark:bg-gray-800 rounded-lg shadow-xl h-auto min-h-0 break-words whitespace-normal">
                 {item.content}
               </div>
             </div>
