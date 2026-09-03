@@ -38,7 +38,7 @@ export default async function ProfilePage({
 
   return (
     <main className="mx-auto max-w-3xl px-4 py-10">
-      <div className="flex items-center gap-8 border-b border-neutral-200 pb-8">
+      <div className="flex flex-col items-center gap-6 border-b border-neutral-200 pb-8 text-center sm:flex-row sm:items-center sm:gap-8 sm:text-left">
         <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-full bg-neutral-100 ring-1 ring-neutral-200 sm:h-32 sm:w-32">
           {profileUser.avatarUrl ? (
             <Image
@@ -57,7 +57,7 @@ export default async function ProfilePage({
         </div>
 
         <div className="flex-1">
-          <div className="flex flex-wrap items-center gap-4">
+          <div className="flex flex-wrap items-center justify-center gap-4 sm:justify-start">
             <h1 className="text-xl font-semibold">{profileUser.username}</h1>
 
             {isOwnProfile && (
@@ -73,7 +73,7 @@ export default async function ProfilePage({
             )}
           </div>
 
-          <dl className="mt-4 flex gap-8 text-sm">
+          <dl className="mt-4 flex flex-wrap justify-center gap-4 text-sm sm:justify-start sm:gap-8">
             <div className="flex items-center gap-1.5">
               <dd className="font-semibold">{postCount}</dd>
               <dt className="text-neutral-500">posts</dt>
@@ -89,7 +89,7 @@ export default async function ProfilePage({
           </dl>
 
           {profileUser.bio && (
-            <p className="mt-4 max-w-md text-sm text-neutral-700">
+            <p className="mt-4 max-w-md text-sm text-neutral-700 mx-auto sm:mx-0">
               {profileUser.bio}
             </p>
           )}
