@@ -15,8 +15,9 @@ const SearchIcon: React.FC<SearchIconProps> = ({ size = 40 }) => {
       strokeWidth={1.5}
       stroke="currentColor"
     >
-      <circle cx="11" cy="11" r="6" />
-      <path strokeLinecap="round" d="M15.5 15.5 20 20" />
+      <circle cx="12" cy="12" r="9" />
+      <circle cx="11" cy="11" r="4" />
+      <path strokeLinecap="round" d="M14.5 14.5 17 17" />
     </svg>
   );
 };
