@@ -199,7 +199,9 @@ export default function GlintPost(props: GlintPostProps) {
           </div>
         </div>
         <div className="ml-3 flex-1">
-          <span className="font-semibold text-sm">{post.user.username}</span>
+          <span className="font-semibold text-sm">
+            <a href={`/profile/${post.user.username}`}>{post.user.username}</a>
+          </span>
           <span className="text-xs text-gray-500 dark:text-gray-300 ml-2">
             • {formatTimeAgo(post.createdAt)}
           </span>
