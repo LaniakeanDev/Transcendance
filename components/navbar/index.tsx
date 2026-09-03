@@ -2,6 +2,7 @@ import Link from 'next/link';
 import Logo from '@/public/logo';
 import UserIcon from '@/public/user';
 import PlusIcon from '@/public/plus';
+import FriendsIcon from '@/public/friends';
 import MessageIcon from '@/public/message';
 import SearchIcon from '@/public/search';
 
@@ -38,7 +39,7 @@ export default function Navbar() {
             <MessageIcon size={40} />
           </Link>
           <Link href="/friends" className="hover:opacity-70 transition-opacity">
-            <MessageIcon size={40} />
+            <FriendsIcon size={40} />
           </Link>
         </div>
       </div>

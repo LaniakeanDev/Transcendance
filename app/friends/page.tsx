@@ -1,5 +1,5 @@
 import { FriendForm } from '@/components/friend-form';
-import MessageHistory from '@/components/message-history';
+import FriendList from '@/components/friend-list';
 import { prisma } from '@/lib/prisma';
 
 const users = await prisma.user.findMany();
@@ -12,7 +12,7 @@ export default function Friends() {
           <FriendForm users={users} />
         </div>
         <div>
-          <MessageHistory />
+          <FriendList />
         </div>
         <div></div>
       </div>
