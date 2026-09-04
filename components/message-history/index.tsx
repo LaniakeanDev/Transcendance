@@ -2,17 +2,6 @@ import { prisma } from '@/lib/prisma';
 import { getCurrentUser } from '@/lib/session';
 import MessageRealtime from '@/components/message-real-time';
 
-// const messages_mockup = [
-//   'hi',
-//   'hello',
-//   'coucou',
-//   'hello',
-//   'coucou',
-//   'hello',
-//   'coucou',
-//   'hello',
-//   'coucou',
-// ];
 
 export default async function MessageHistory() {
   const user = await getCurrentUser();

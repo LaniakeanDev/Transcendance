@@ -10,7 +10,7 @@ export default function MessageRealtime() {
   useEffect(() => {
     const supabase = getSupabaseBrowserClient();
 
-    const channel = supabase
+    const messagesChannel = supabase
       .channel('messages-realtime')
       .on(
         'postgres_changes',
@@ -24,11 +24,29 @@ export default function MessageRealtime() {
         }
       )
       .subscribe((status) => {
-        console.log('Realtime status:', status);
+        console.log('Messages realtime:', status);
+      });
+
+    const usersChannel = supabase
+      .channel('users-realtime')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'users',
+        },
+        () => {
+          router.refresh();
+        }
+      )
+      .subscribe((status) => {
+        console.log('Users realtime:', status);
       });
 
     return () => {
-      supabase.removeChannel(channel);
+      supabase.removeChannel(messagesChannel);
+      supabase.removeChannel(usersChannel);
     };
   }, [router]);
 
