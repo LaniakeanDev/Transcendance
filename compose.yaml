@@ -1,0 +1,39 @@
+# Works with `docker compose` and `podman-compose`.
+# DB is NOT here on purpose: it stays remote on Supabase.
+
+services:
+  app:
+    build:
+      context: .
+      target: runner
+    image: transcendance-app
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: production
+    expose:
+      - "3000"
+    # No published port: only the proxy is reachable from the host, over HTTPS.
+    networks:
+      - web
+
+  proxy:
+    build:
+      context: ./nginx
+    image: transcendance-proxy
+    restart: unless-stopped
+    depends_on:
+      - app
+    ports:
+      - "${HTTPS_PORT:-3000}:443"
+    volumes:
+      - certs:/etc/nginx/certs
+    networks:
+      - web
+
+networks:
+  web:
+
+volumes:
+  certs:

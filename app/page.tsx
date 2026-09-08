@@ -1,13 +1,57 @@
-import Image from 'next/image';
+import GlintPost from '@/components/post';
+import { prisma } from '@/lib/prisma';
+import { PostWithRelations } from '@/types/types';
+import { getCurrentUser } from '@/lib/session';
+import { redirect } from 'next/navigation';
 
-export default function Home() {
+export default async function Home() {
+  const user = await getCurrentUser();
+  if (!user) {
+    redirect('/login');
+  }
+  const posts: PostWithRelations[] = await prisma.post.findMany({
+    orderBy: { createdAt: 'desc' },
+    include: {
+      user: {
+        select: {
+          id: true,
+          username: true,
+          avatarUrl: true,
+        },
+      },
+      likes: {
+        select: {
+          id: true,
+          userId: true,
+          user: {
+            select: {
+              id: true,
+              username: true,
+            },
+          },
+        },
+      },
+      comments: {
+        select: {
+          id: true,
+          userId: true,
+          text: true,
+          createdAt: true,
+          user: {
+            select: {
+              id: true,
+              username: true,
+            },
+          },
+        },
+      },
+    },
+  });
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <div>
-          <p>Transcendance v1</p>
-        </div>
-      </main>
-    </div>
+    <main className="">
+      {posts.map((post) => (
+        <GlintPost key={post.id} post={post} userId={user.id} />
+      ))}
+    </main>
   );
 }
